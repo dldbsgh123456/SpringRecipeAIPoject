@@ -4,7 +4,7 @@ pipeline {
 	environment {
 		APP_DIR = "~/app"
 		JAR_NAME = "SpringRecipeAIProject-0.0.1-SNAPSHOT.jar"
-		DOCKER_IMAGE = "jeunju528/ai-app:lastet"
+		DOCKER_IMAGE = "jeunju528/ai-app:latest"
 	}
 	
 	stages {
