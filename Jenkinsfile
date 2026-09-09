@@ -19,11 +19,11 @@ pipeline {
 			steps {
 				withCredentials([
 					string(
-						credentailsId: 'post-url'
+						credentialsId: 'post-url'
 						variable: 'POST_URL'
 					),
 					string(
-						credentailsId: 'gen-key'
+						credentialsId: 'gen-key'
 						variable: 'GEN_KEY'
 					)
 				]){
@@ -57,7 +57,7 @@ pipeline {
 			steps {
 				withCredentials([
 					usernamePassword(
-						credentailsId: 'dockerhub_info',
+						credentialsId: 'dockerhub_info',
 						usernameVariable: 'DH_USER',
 						passwordVariable: 'DH_PASS'
 					)
@@ -68,7 +68,6 @@ pipeline {
 				}
 			}
 		}
-		
 		stage("DockerHub Push"){
 			steps {
 				sh '''
