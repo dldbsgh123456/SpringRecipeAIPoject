@@ -29,8 +29,8 @@ pipeline {
 				]){
 					sh '''
 						echo "SPRING_PROFILES_ACTIVE=prod" > .env
-						echo "POST_URL=${POST_URL} >> .env
-						echo "GEN_KEY=${GEN_KEY} >> .env
+						echo "POST_URL=${POST_URL}" >> .env
+						echo "GEN_KEY=${GEN_KEY}" >> .env
 						chmod 600 .env
 					   '''
 				}
