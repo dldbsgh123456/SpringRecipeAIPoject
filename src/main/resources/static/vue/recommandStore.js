@@ -41,7 +41,7 @@ const userRecipeStore=defineStore('recipe',()=>{
 		// 선택된 재료 배열
 		const selectedIngredients=ref([])
 		// 현재 선택된 카테고리
-		const selectedCaegory=ref("all")
+		const selectedCategory=ref("all")
 		// AI 검색 로딩 여부
 		const loading=ref(false)
 		// 오류 메세지
@@ -221,7 +221,7 @@ const userRecipeStore=defineStore('recipe',()=>{
 			if(index!==-1)
 				{
 					// 배열에서 삭제
-					selectedIngredients.value.slice(index,1)
+					selectedIngredients.value.splice(index,1)
 				}
 				else
 				{
