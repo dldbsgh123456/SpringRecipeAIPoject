@@ -159,14 +159,12 @@ pipeline {
 				]){
 					sh '''
 					   ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@16.184.48.221 \
-					   "mkdir -p /home/ubuntu/app && \					   
-					   cd /home/ubuntu/app && \					   
-					   rm -f .env && \					   
-					   echo "SPRING_PROFILES_ACTIVE=prod" > .env && \
-					   echo "POST_URL=${POST_URL}" >> .env && \
-					   echo "GEN_KEY=${GEN_KEY}" >> .env && \					   
-					   chmod 600 .env"					   			
-					   '''
+					   "mkdir -p /home/ubuntu/app && cd /home/ubuntu/app && rm -f .env && \
+					   echo SPRING_PROFILES_ACTIVE=prod > .env && \
+					   echo POST_URL=${POST_URL} >> .env && \
+					   echo GEN_KEY=${GEN_KEY} >> .env && \
+					   chmod 600 .env"
+   					   '''
 				}
 			}
 		}
@@ -184,7 +182,7 @@ pipeline {
 					sh '''
 					    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@16.184.48.221 "mkdir -p /home/ubuntu/app"
 					    
-					    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@16.184.48.221 docker-compose.yml ubuntu@16.184.48.221:/home/ubuntu/app/docker-compose.yml
+					    scp -i "$SSH_KEY" -o StrictHostKeyChecking=no docker-compose.yml ubuntu@16.184.48.221:/home/ubuntu/app/docker-compose.yml
 					   '''
 					   
 				}
@@ -201,14 +199,11 @@ pipeline {
 					)
 				]){
 					sh '''
-					    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@16.184.48.221<<EOF
-					    cd /home/ubuntu/app
-					    docker-compose down
-					    docker-compose pull
-					    docker-compose up -d
-					    
-					    EOF
-					    
+					    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no ubuntu@16.184.48.221 \
+					    "cd /home/ubuntu/app && \
+					    docker-compose down && \
+					    docker-compose pull && \
+					    docker-compose up -d"				    
 					   '''
 				}
 			}
