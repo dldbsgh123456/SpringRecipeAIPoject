@@ -32,7 +32,7 @@ pipeline {
 		// AWS EC2
 		SERVER_USER="ubuntu"
 		SERVER_IP="16.184.48.221"
-		APP_DIR="/home/ubuntu/app"
+		//APP_DIR="/home/ubuntu/app"
 	}
 	// 우분투 (AWS) 명령어 수행 
 	/*
@@ -53,7 +53,6 @@ pipeline {
 			steps {
 				sh '''
 				    java -version
-				    ./gradlew --version
 				   '''
 			}
 		}
