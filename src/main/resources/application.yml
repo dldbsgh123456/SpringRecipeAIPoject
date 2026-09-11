@@ -1,8 +1,5 @@
 server:
   port: 9090
-  servlet:
-    context-path: /
-
 spring:
   # 데이터베이스 설정 (다중 DB 바인딩용 커스텀 프로퍼티)
   datasource:
@@ -10,7 +7,6 @@ spring:
       username: postgres
       password: "1234"
       driver-class-name: org.postgresql.Driver 
-
   thymeleaf:
     cache: false
     encoding: UTF-8
@@ -21,11 +17,11 @@ spring:
   ai:
     google:
       genai:
-        api-key: ${GEMINI_KEY}
+        api-key: ${GEN_KEY}
         project-id: gen-lang-client-0074645742
         location: us-central1
         embedding:
-          api-key: ${GEMINI_KEY}
+          api-key: ${GEN_KEY}
           project-id: gen-lang-client-0074645742
           text: 
             options:
@@ -34,7 +30,6 @@ spring:
     model: 
       embedding:
         text: google-genai
-
 # MyBatis 설정
 mybatis:
   type-aliases-package: com.sist.web.vo

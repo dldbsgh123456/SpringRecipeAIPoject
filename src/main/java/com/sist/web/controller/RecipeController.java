@@ -1,4 +1,5 @@
 package com.sist.web.controller;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sist.web.service.RecipeService;
 
 import lombok.RequiredArgsConstructor;
+
 /*
  *    1. 전체 동작 과정 
  *       <브라우저> : HTML / JavaScript(바닐라JS)
@@ -72,221 +74,147 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RecipeController {
 
+	/*
+	 * Vector 검색 Service
+	 */
+	private final RecipeService recipeVectorService;
 
-    /*
-     * Vector 검색 Service
-     */
-    private final RecipeService recipeVectorService;
+	/**
+	 * ======================================================== 
+	 *   레시피 추천 화면
+	 * ========================================================
+	 *
+	 * GET
+	 *
+	 * http://localhost:8080/recipe/recommand
+	 */
+	@GetMapping("/recommand")
+	public String recommandPage(Model model) {
 
+		/*
+		 * 처음에는 검색 결과가 없도록 설정
+		 */
+		model.addAttribute("recipes", Collections.emptyList());
 
-    /**
-     * ========================================================
-     * 레시피 추천 화면
-     * ========================================================
-     *
-     * GET
-     *
-     * http://localhost:8080/recipe/recommand
-     */
-    @GetMapping("/recommand")
-    public String recommandPage(Model model) {
+		return "recipe/recommand";
+	}
 
-        /*
-         * 처음에는 검색 결과가 없도록 설정
-         */
-        model.addAttribute(
-                "recipes",
-                Collections.emptyList()
-        );
+	/**
+	 * ======================================================== 
+	 * 	 레시피 Vector 검색
+	 * ========================================================
+	 *
+	 * POST
+	 *
+	 * /recipe/recommand
+	 *
+	 * JSON
+	 *
+	 * { "ingredients": [ "김치", "돼지고기", "두부" ] }
+	 */
+	@PostMapping("/recommand")
+	@ResponseBody
+	public Map<String, Object> recommand(@RequestBody Map<String, Object> request) {
 
-        return "recipe/recommand";
-    }
+		Map<String, Object> response = new HashMap<>();
 
+		try {
 
-    /**
-     * ========================================================
-     * 레시피 Vector 검색
-     * ========================================================
-     *
-     * POST
-     *
-     * /recipe/recommand
-     *
-     * JSON
-     *
-     * {
-     *   "ingredients": [
-     *      "김치",
-     *      "돼지고기",
-     *      "두부"
-     *   ]
-     * }
-     */
-    @PostMapping("/recommand")
-    @ResponseBody
-    public Map<String, Object> recommand(
-            @RequestBody Map<String, Object> request) {
+			/*
+			 * JSON에서 ingredients 추출
+			 */
+			Object ingredientObject = request.get("ingredients");
 
-        Map<String, Object> response =
-                new HashMap<>();
+			/*
+			 * 재료가 없는 경우
+			 */
+			if (ingredientObject == null) {
 
+				response.put("success", false);
 
-        try {
+				response.put("message", "재료를 선택해주세요.");
 
-            /*
-             * JSON에서 ingredients 추출
-             */
-            Object ingredientObject =
-                    request.get("ingredients");
+				response.put("recipes", Collections.emptyList());
 
-            /*
-             * 재료가 없는 경우
-             */
-            if (ingredientObject == null) {
+				return response;
+			}
 
-                response.put(
-                        "success",
-                        false
-                );
+			/*
+			 * JSON 배열 → List<String>
+			 */
+			List<String> ingredients = new ArrayList<>();
 
-                response.put(
-                        "message",
-                        "재료를 선택해주세요."
-                );
+			if (ingredientObject instanceof List<?>) {
 
-                response.put(
-                        "recipes",
-                        Collections.emptyList()
-                );
+				List<?> list = (List<?>) ingredientObject;
 
-                return response;
-            }
+				for (Object value : list) {
 
+					if (value != null) {
 
-            /*
-             * JSON 배열 → List<String>
-             */
-            List<String> ingredients =
-                    new ArrayList<>();
+						String ingredient = value.toString().trim();
 
-            if (ingredientObject instanceof List<?>) {
+						if (!ingredient.isEmpty()) {
 
-                List<?> list =
-                        (List<?>) ingredientObject;
+							ingredients.add(ingredient);
+						}
+					}
+				}
+			}
 
-                for (Object value : list) {
+			/*
+			 * 선택 재료가 없는 경우
+			 */
+			if (ingredients.isEmpty()) {
 
-                    if (value != null) {
+				response.put("success", false);
 
-                        String ingredient =
-                                value.toString().trim();
+				response.put("message", "재료를 한 개 이상 선택해주세요.");
 
-                        if (!ingredient.isEmpty()) {
+				response.put("recipes", Collections.emptyList());
 
-                            ingredients.add(
-                                    ingredient
-                            );
-                        }
-                    }
-                }
-            }
+				return response;
+			}
 
+			/*
+			 * ================================================= Vector 검색
+			 * =================================================
+			 */
+			List<Map<String, Object>> recipes = recipeVectorService.recommandRecipes(ingredients);
 
-            /*
-             * 선택 재료가 없는 경우
-             */
-            if (ingredients.isEmpty()) {
+			/*
+			 * 정상 응답
+			 */
+			response.put("success", true);
 
-                response.put(
-                        "success",
-                        false
-                );
+			response.put("message", recipes.isEmpty() ? "추천 레시피가 없습니다." : "레시피 추천이 완료되었습니다.");
 
-                response.put(
-                        "message",
-                        "재료를 한 개 이상 선택해주세요."
-                );
+			response.put("recipes", recipes);
 
-                response.put(
-                        "recipes",
-                        Collections.emptyList()
-                );
+			/*
+			 * 사용자가 선택한 재료도 반환
+			 */
+			response.put("selectedIngredients", ingredients);
 
-                return response;
-            }
+			return response;
 
+		} catch (Exception e) {
 
-            /*
-             * =================================================
-             * Vector 검색
-             * =================================================
-             */
-            List<Map<String, Object>> recipes =
-                    recipeVectorService.recommandRecipes(
-                            ingredients
-                    );
+			/*
+			 * 서버 로그
+			 */
+			e.printStackTrace();
 
+			/*
+			 * 오류 응답
+			 */
+			response.put("success", false);
 
-            /*
-             * 정상 응답
-             */
-            response.put(
-                    "success",
-                    true
-            );
+			response.put("message", "레시피 검색 중 오류가 발생했습니다.");
 
-            response.put(
-                    "message",
-                    recipes.isEmpty()
-                            ? "추천 레시피가 없습니다."
-                            : "레시피 추천이 완료되었습니다."
-            );
+			response.put("recipes", Collections.emptyList());
 
-            response.put(
-                    "recipes",
-                    recipes
-            );
-
-
-            /*
-             * 사용자가 선택한 재료도 반환
-             */
-            response.put(
-                    "selectedIngredients",
-                    ingredients
-            );
-
-
-            return response;
-
-
-        } catch (Exception e) {
-
-            /*
-             * 서버 로그
-             */
-            e.printStackTrace();
-
-
-            /*
-             * 오류 응답
-             */
-            response.put(
-                    "success",
-                    false
-            );
-
-            response.put(
-                    "message",
-                    "레시피 검색 중 오류가 발생했습니다."
-            );
-
-            response.put(
-                    "recipes",
-                    Collections.emptyList()
-            );
-
-            return response;
-        }
-    }
+			return response;
+		}
+	}
 }
